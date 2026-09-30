@@ -104,4 +104,21 @@ router.post('/:id/time', authMiddleware, async (req, res) => {
   res.status(201).json({ message: 'Time logged' });
 });
 
+// GET /tickets/:id/time
+router.get('/:id/time', async (req, res) => {
+  const ticketId = Number(req.params.id);
+
+  if (Number.isNaN(ticketId)) {
+    res.status(400).json({ error: 'Invalid ID' });
+    return;
+  }
+
+  const totalHours = await getTotalHoursForTicket(ticketId);
+
+  res.json({
+    ticket_id: ticketId,
+    total_hours: totalHours,
+  });
+});
+
 export default router;
