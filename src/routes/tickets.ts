@@ -5,6 +5,10 @@ import {
   createTicket,
   updateTicketStatus,
 } from '../dal/tickets.js';
+import {
+  insertTimeLog,
+  getTotalHoursForTicket,
+} from '../dal/timeLogs.js';
 import authMiddleware from '../middleware/auth.js';
 
 const router = Router();
@@ -78,6 +82,26 @@ router.patch('/:id/status', authMiddleware, async (req, res) => {
   }
 
   res.json(ticket);
+});
+
+// POST /tickets/:id/time
+router.post('/:id/time', authMiddleware, async (req, res) => {
+  const ticketId = Number(req.params.id);
+  const { hours } = req.body;
+
+  if (Number.isNaN(ticketId)) {
+    res.status(400).json({ error: 'Invalid ID' });
+    return;
+  }
+
+  if (typeof hours !== 'number') {
+    res.status(400).json({ error: 'Hours is required' });
+    return;
+  }
+
+  await insertTimeLog(ticketId, res.locals.userId, hours);
+
+  res.status(201).json({ message: 'Time logged' });
 });
 
 export default router;
